@@ -170,3 +170,6 @@ cython_debug/
 
 # pdf files
 *.pdf
+
+# Specific data files
+COT_collection.json
