@@ -167,3 +167,6 @@ cython_debug/
 
 # parquet files
 *.parquet
+
+# pdf files
+*.pdf
