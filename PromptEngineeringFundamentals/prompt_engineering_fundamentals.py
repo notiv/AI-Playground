@@ -1,6 +1,8 @@
 #%%
 import hvac
 import os
+import pandas as pd
+import random
 
 #%%
 from langchain.chat_models import ChatOpenAI
@@ -103,3 +105,20 @@ chain.run({
     'question': question,
     'reference': lower_level
 })
+
+# %%
+# ## Chain of Thought
+cot_df = pd.read_json('COT_collection.json')
+# %%
+cot_df.head(10)
+# %%
+template = """
+Question: {Question}
+Rationale: {Rationale}
+Response: {Response}
+"""
+
+example_prompt = PromptTemplate(
+    input_variables=['Question', 'Rationale', 'Response'],
+    template=template,
+)
