@@ -7,7 +7,7 @@ import random
 #%%
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain, LLMChain
-from langchain.prompts import PromptTemplate, FewShotChatMessagePromptTemplate, ChatPromptTemplate
+from langchain.prompts import PromptTemplate, FewShotPromptTemplate, ChatPromptTemplate
 
 #%%
 # Retrieve the openai_test_token from Vault
@@ -107,18 +107,11 @@ chain.run({
 })
 
 # %%
-# ## Chain of Thought
-cot_df = pd.read_json('COT_collection.json')
+# ## Self-consistency
+chat_model = ChatOpenAI(openai_api_key=openai_token, temperature=0.7)
 # %%
-cot_df.head(10)
-# %%
-template = """
-Question: {Question}
-Rationale: {Rationale}
-Response: {Response}
-"""
-
-example_prompt = PromptTemplate(
-    input_variables=['Question', 'Rationale', 'Response'],
-    template=template,
+cot_chain = LLMChain(
+    llm=chat_model,
+    prompt=final_prompt,
+    verbose=True
 )
