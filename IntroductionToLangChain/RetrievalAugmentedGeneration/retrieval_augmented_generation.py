@@ -19,6 +19,9 @@ from langchain.callbacks import StdOutCallbackHandler
 
 from langchain.docstore.document import Document
 
+from langchain.utilities import ApifyWrapper
+from langchain.document_loaders.base import Document
+
 from newsapi import NewsApiClient
 #%% 
 # Retrieve the openai_test_token and the newsapi_token from Vault
@@ -40,7 +43,7 @@ except hvac.exceptions.InvalidPath:
 try:
     newsapi_token = client.secrets.kv.v2.read_secret(path='news_api', mount_point='kv')['data']['data']['news_api_key']
 except hvac.exceptions.InvalidPath:
-    print('The openai secret path is invalid.')
+    print('The newsapi secret path is invalid.')
     exit(1)
 
 
@@ -147,4 +150,28 @@ What is the most important news about artificial intelligence from last week?
 # %%
 answer = chain.run(question)
 print(answer)
+# %%
+## Index a website
+
+#%%
+try:
+    apify_token = client.secrets.kv.v2.read_secret(path='apify_token', mount_point='kv')['data']['data']['apify_token']
+except hvac.exceptions.InvalidPath:
+    print('The apify secret path is invalid.')
+    exit(1)
+
+#%%
+os.environ['APIFY_API_TOKEN'] = apify_token
+apify = ApifyWrapper()
+#%%
+loader = apify.call_actor(
+    actor_id="apify/website-content-crawler",
+    run_input={
+        "startUrls": [{"url": "https://newsletter.theaiedge.io/"}],
+        "aggressivePrune": True,
+    },
+    dataset_mapping_function=lambda item: Document(
+        page_content=item["text"] or "", metadata={"source": item["url"]}
+    ),
+)
 # %%
